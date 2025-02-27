@@ -610,12 +610,9 @@ export async function getAuthToken(): Promise<string> {
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
   
   if (!token) {
-    // In development mode, use the special test token that the backend accepts
-    if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
-      console.log('Using test token for development');
-      return 'test-token';
-    }
-    return '';
+    // Always use the test token for demo purposes
+    console.log('Using test token for demo');
+    return 'test-token';
   }
   
   return token;
