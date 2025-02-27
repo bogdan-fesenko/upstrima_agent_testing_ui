@@ -13,6 +13,7 @@ interface AgentPreviewSidebarProps {
 export function AgentPreviewSidebar({ agent: propAgent, onClose }: AgentPreviewSidebarProps) {
   const [agent, setAgent] = useState<Agent | null>(propAgent);
   const [loading, setLoading] = useState(false);
+  const [isRestarting, setIsRestarting] = useState(false);
   // Removed showOutputInstructions state as instructions will always be visible
 
   // Listen for agent selection events
@@ -78,7 +79,6 @@ export function AgentPreviewSidebar({ agent: propAgent, onClose }: AgentPreviewS
     "12/12/24";
     
   // Handle restarting the agent (creating a new chat)
-  const [isRestarting, setIsRestarting] = useState(false);
   
   const handleRestartAgent = async () => {
     if (!agent) return;
