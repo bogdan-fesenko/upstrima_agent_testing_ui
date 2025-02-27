@@ -1,0 +1,227 @@
+{
+  "name": "DMR AI Agent",
+  "description": "An AI agent specialized for analyzing and responding to queries about Daily Morning Reports (DMR) in the oil and gas industry",
+  "nodes": [
+    {
+      "id": "input_node",
+      "type": "InputNode",
+      "config": {
+        "input_fields": ["query", "user_id", "chat_id", "file_path"]
+      }
+    },
+    {
+      "id": "file_parser_node",
+      "type": "FileParserNode",
+      "config": {
+        "supported_formats": ["pdf", "csv", "xlsx"],
+        "extraction_mode": "structured",
+        "table_extraction": true,
+        "ocr_enabled": true,
+        "max_file_size_mb": 10,
+        "file_type": "auto",
+        "encoding": "utf-8",
+        "strict_mode": false
+      }
+    },
+    {
+      "id": "data_transform_node",
+      "type": "DataTransformNode",
+      "config": {
+        "transformations": [
+          {
+            "type": "filter",
+            "field": "data",
+            "condition": "not_null"
+          },
+          {
+            "type": "normalize",
+            "field": "data.measurements",
+            "target_units": {
+              "pressure": "psi",
+              "temperature": "fahrenheit",
+              "volume": "barrels",
+              "flow_rate": "bpd"
+            }
+          },
+          {
+            "type": "calculate",
+            "field": "data.production_metrics",
+            "calculations": [
+              {
+                "name": "daily_production_change",
+                "formula": "{{current.oil_production}} - {{previous.oil_production}}"
+              },
+              {
+                "name": "water_cut_percentage",
+                "formula": "{{current.water_production}} / ({{current.oil_production}} + {{current.water_production}}) * 100"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "llm_node",
+      "type": "LLMNode",
+      "config": {
+        "model": "gpt-4",
+        "system_prompt": "You are a specialized oil and gas industry assistant focused on analyzing Daily Morning Reports (DMR). You have expertise in drilling operations, production metrics, and field management. Provide clear, concise, and accurate information based on the data provided. When appropriate, highlight important trends, anomalies, or potential issues that require attention. Use industry-standard terminology and units of measurement.",
+        "tools": [
+          {
+            "name": "calculate_oil_production",
+            "description": "Calculate oil production metrics based on input parameters",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "flow_rate": {
+                  "type": "number",
+                  "description": "Flow rate in barrels per day (BPD)"
+                },
+                "hours_online": {
+                  "type": "number",
+                  "description": "Hours the well was online"
+                },
+                "choke_size": {
+                  "type": "number",
+                  "description": "Choke size in 64ths of an inch"
+                },
+                "pressure": {
+                  "type": "number",
+                  "description": "Wellhead pressure in PSI"
+                }
+              },
+              "required": ["flow_rate", "hours_online"]
+            }
+          },
+          {
+            "name": "convert_units",
+            "description": "Convert between different units of measurement used in oil and gas industry",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "description": "Value to convert"
+                },
+                "from_unit": {
+                  "type": "string",
+                  "description": "Source unit (e.g., 'bbl', 'mcf', 'psi')"
+                },
+                "to_unit": {
+                  "type": "string",
+                  "description": "Target unit (e.g., 'm3', 'mmscf', 'kPa')"
+                }
+              },
+              "required": ["value", "from_unit", "to_unit"]
+            }
+          },
+          {
+            "name": "analyze_trend",
+            "description": "Analyze trend in time series data and provide statistical insights",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "data_points": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Array of numeric values representing the time series"
+                },
+                "time_period": {
+                  "type": "string",
+                  "description": "Time period between data points (e.g., 'daily', 'hourly')"
+                }
+              },
+              "required": ["data_points"]
+            }
+          }
+        ],
+        "max_tokens": 2000,
+        "temperature": 0.3,
+        "memory_enabled": true,
+        "memory_window_size": 10
+      }
+    },
+    {
+      "id": "output_node",
+      "type": "OutputNode",
+      "config": {
+        "output_fields": ["response", "processed_data"]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "input_node",
+      "target": "file_parser_node",
+      "data": {
+        "sourceOutput": "file_path",
+        "targetInput": "file_path"
+      }
+    },
+    {
+      "source": "file_parser_node",
+      "target": "data_transform_node",
+      "data": {
+        "sourceOutput": "data",
+        "targetInput": "data"
+      }
+    },
+    {
+      "source": "data_transform_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "transformed_data",
+        "targetInput": "context_data"
+      }
+    },
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "query",
+        "targetInput": "prompt"
+      }
+    },
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "user_id",
+        "targetInput": "user_id"
+      }
+    },
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "chat_id",
+        "targetInput": "chat_id"
+      }
+    },
+    {
+      "source": "llm_node",
+      "target": "output_node",
+      "data": {
+        "sourceOutput": "response",
+        "targetInput": "response"
+      }
+    },
+    {
+      "source": "data_transform_node",
+      "target": "output_node",
+      "data": {
+        "sourceOutput": "transformed_data",
+        "targetInput": "processed_data"
+      }
+    }
+  ],
+  "config": {
+    "max_retries": 3,
+    "timeout": 180,
+    "description": "This agent specializes in analyzing Daily Morning Reports (DMR) for oil and gas operations. It can parse structured data from various file formats, normalize measurements to industry-standard units, calculate key production metrics, and provide insights using specialized oil and gas industry knowledge.",
+    "version": 1,
+    "tags": ["oil", "gas", "dmr", "production", "analysis"]
+  }
+}

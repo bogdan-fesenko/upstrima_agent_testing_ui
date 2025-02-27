@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+  }
+
+  /* Upstrima dark theme (always applied) */
+  :root {
+    --background: 0 0% 7%; /* #121212 */
+    --foreground: 0 0% 98%;
+    --card: 0 0% 12%; /* #1E1E1E */
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 165 78% 59%; /* #4FE0B6 teal */
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 16%; /* #2A2A2A */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 45 89% 70%; /* #F5D76E gold */
+    --accent-foreground: 0 0% 7%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 165 78% 59%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom styles for the AI Agents UI */
+.sidebar-agent-item {
+  @apply flex items-center gap-2 p-2 rounded-md hover:bg-secondary transition-colors;
+}
+
+.sidebar-agent-item.active {
+  @apply bg-secondary;
+}
+
+.chat-message-user {
+  @apply bg-primary text-primary-foreground rounded-lg p-3 max-w-[80%] ml-auto;
+}
+
+.chat-message-assistant {
+  @apply bg-card border rounded-lg p-3 max-w-[80%];
+}
+
+/* Markdown content styles */
+.markdown-content {
+  @apply text-white;
+}
+
+.markdown-content h1 {
+  @apply text-2xl font-bold mb-4 mt-6;
+}
+
+.markdown-content h2 {
+  @apply text-xl font-bold mb-3 mt-5;
+}
+
+.markdown-content h3 {
+  @apply text-lg font-bold mb-2 mt-4;
+}
+
+.markdown-content h4 {
+  @apply text-base font-bold mb-2 mt-3;
+}
+
+.markdown-content p {
+  @apply mb-4;
+}
+
+.markdown-content ul, .markdown-content ol {
+  @apply mb-4 ml-6;
+}
+
+.markdown-content ul {
+  @apply list-disc;
+}
+
+.markdown-content ol {
+  @apply list-decimal;
+}
+
+.markdown-content li {
+  @apply mb-1;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-upstrima-light-gray pl-4 italic my-4;
+}
+
+.markdown-content code {
+  @apply bg-upstrima-light-gray text-white px-1 py-0.5 rounded text-sm;
+}
+
+.markdown-content pre {
+  @apply bg-upstrima-light-gray text-white p-4 rounded-md my-4 overflow-x-auto;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Table wrapper for horizontal scrolling */
+.markdown-content .table-wrapper {
+  @apply overflow-x-auto mb-4;
+  max-width: 100%;
+}
+
+.markdown-content table {
+  @apply w-full border-collapse;
+  min-width: 100%;
+}
+
+.markdown-content th, .markdown-content td {
+  @apply border border-upstrima-light-gray p-2 text-sm;
+  min-width: 80px;
+}
+
+.markdown-content th {
+  @apply bg-upstrima-light-gray font-bold text-center;
+}
+
+.markdown-content tr:nth-child(even) {
+  @apply bg-upstrima-light-gray/30;
+}
+
+.markdown-content tr:hover {
+  @apply bg-upstrima-light-gray/50;
+}
+
+.markdown-content a {
+  @apply text-upstrima-teal underline;
+}
+
+.markdown-content hr {
+  @apply my-6 border-t border-upstrima-light-gray;
+}
+
+.markdown-content strong {
+  @apply font-bold;
+}
+
+.markdown-content em {
+  @apply italic;
+}
+
+/* Dark mode by default */
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}

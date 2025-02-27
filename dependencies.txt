@@ -1,0 +1,17 @@
+# Dependencies to install for the Create Agent Modal
+
+# UI Components
+@radix-ui/react-dialog
+@radix-ui/react-label
+@radix-ui/react-slot
+class-variance-authority
+clsx
+tailwind-merge
+
+# Form Handling
+react-hook-form
+@hookform/resolvers
+zod
+
+# Install command:
+# npm install @radix-ui/react-dialog @radix-ui/react-label @radix-ui/react-slot class-variance-authority clsx tailwind-merge react-hook-form @hookform/resolvers zod

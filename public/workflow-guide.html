@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow JSON Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #111;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .note {
+            background-color: #e7f3fe;
+            border-left: 4px solid #2196F3;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Workflow JSON Guide</h1>
+    
+    <p>This guide explains how to create valid workflow JSON files for the AI Agent platform.</p>
+    
+    <h2>Basic Structure</h2>
+    
+    <p>A workflow JSON file must contain the following top-level fields:</p>
+    
+    <table>
+        <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Required</th>
+        </tr>
+        <tr>
+            <td><code>name</code></td>
+            <td>String</td>
+            <td>Name of the workflow</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>description</code></td>
+            <td>String</td>
+            <td>Description of the workflow</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td><code>nodes</code></td>
+            <td>Array</td>
+            <td>Array of node objects</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>edges</code></td>
+            <td>Array</td>
+            <td>Array of edge objects connecting nodes</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>config</code></td>
+            <td>Object</td>
+            <td>Configuration options for the workflow</td>
+            <td>No</td>
+        </tr>
+    </table>
+    
+    <h2>Nodes</h2>
+    
+    <p>Each node in the <code>nodes</code> array must have the following structure:</p>
+    
+    <pre><code>{
+  "id": "unique_node_id",
+  "type": "NodeType",
+  "config": {
+    // Node-specific configuration
+  }
+}</code></pre>
+    
+    <p>The following node types are supported:</p>
+    
+    <h3>InputNode</h3>
+    
+    <p>Defines the inputs to the workflow.</p>
+    
+    <pre><code>{
+  "id": "input_node",
+  "type": "InputNode",
+  "config": {
+    "input_fields": ["query", "user_id", "chat_id"]
+  }
+}</code></pre>
+    
+    <h3>LLMNode</h3>
+    
+    <p>Represents a language model that processes inputs and generates responses.</p>
+    
+    <pre><code>{
+  "id": "llm_node",
+  "type": "LLMNode",
+  "config": {
+    "model": "gpt-4",
+    "system_prompt": "You are a helpful assistant.",
+    "tools": [],
+    "max_tokens": 1000,
+    "temperature": 0.7,
+    "memory_enabled": true,
+    "memory_window_size": 10
+  }
+}</code></pre>
+    
+    <h3>HttpRequestNode</h3>
+    
+    <p>Makes HTTP requests to external APIs.</p>
+    
+    <pre><code>{
+  "id": "http_node",
+  "type": "HttpRequestNode",
+  "config": {
+    "method": "GET",
+    "url": "https://api.example.com/data",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer {api_key}"
+    },
+    "timeout": 30,
+    "retry_count": 3
+  }
+}</code></pre>
+    
+    <h3>FileParserNode</h3>
+    
+    <p>Parses files of various formats.</p>
+    
+    <pre><code>{
+  "id": "file_parser",
+  "type": "FileParserNode",
+  "config": {
+    "file_type": "auto",
+    "encoding": "utf-8",
+    "strict_mode": false
+  }
+}</code></pre>
+    
+    <h3>DataTransformNode</h3>
+    
+    <p>Transforms data between nodes.</p>
+    
+    <pre><code>{
+  "id": "data_transform",
+  "type": "DataTransformNode",
+  "config": {
+    "transformations": {
+      "combined_data": {
+        "operation": "concat",
+        "fields": ["files[*].data"],
+        "separator": "\n\n"
+      }
+    }
+  }
+}</code></pre>
+    
+    <h3>OutputNode</h3>
+    
+    <p>Defines the outputs of the workflow.</p>
+    
+    <pre><code>{
+  "id": "output_node",
+  "type": "OutputNode",
+  "config": {
+    "output_fields": ["response"]
+  }
+}</code></pre>
+    
+    <h2>Edges</h2>
+    
+    <p>Edges connect nodes together, defining how data flows through the workflow. Each edge must have the following structure:</p>
+    
+    <pre><code>{
+  "source": "source_node_id",
+  "target": "target_node_id",
+  "data": {
+    "sourceOutput": "output_field_from_source",
+    "targetInput": "input_field_to_target"
+  }
+}</code></pre>
+    
+    <div class="note">
+        <p><strong>Note:</strong> Every edge must reference valid node IDs in the <code>source</code> and <code>target</code> fields.</p>
+    </div>
+    
+    <h2>Example Workflow</h2>
+    
+    <p>Here's a complete example of a simple workflow:</p>
+    
+    <pre><code>{
+  "name": "Simple Assistant",
+  "description": "A basic conversational assistant",
+  "nodes": [
+    {
+      "id": "input_node",
+      "type": "InputNode",
+      "config": {
+        "input_fields": ["query", "user_id", "chat_id"]
+      }
+    },
+    {
+      "id": "llm_node",
+      "type": "LLMNode",
+      "config": {
+        "model": "gpt-4",
+        "system_prompt": "You are a helpful assistant.",
+        "tools": [],
+        "max_tokens": 1000,
+        "temperature": 0.7,
+        "memory_enabled": true,
+        "memory_window_size": 10
+      }
+    },
+    {
+      "id": "output_node",
+      "type": "OutputNode",
+      "config": {
+        "output_fields": ["response"]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "query",
+        "targetInput": "prompt"
+      }
+    },
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "user_id",
+        "targetInput": "user_id"
+      }
+    },
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "chat_id",
+        "targetInput": "chat_id"
+      }
+    },
+    {
+      "source": "llm_node",
+      "target": "output_node",
+      "data": {
+        "sourceOutput": "response",
+        "targetInput": "response"
+      }
+    }
+  ],
+  "config": {
+    "max_retries": 3,
+    "timeout": 60
+  }
+}</code></pre>
+    
+    <h2>Common Errors</h2>
+    
+    <ul>
+        <li><strong>Missing required fields</strong>: Ensure all required fields are present in your JSON.</li>
+        <li><strong>Invalid node references</strong>: Make sure all edges reference valid node IDs.</li>
+        <li><strong>Invalid JSON format</strong>: Check for syntax errors like missing commas or brackets.</li>
+        <li><strong>Invalid node configurations</strong>: Each node type has specific configuration requirements.</li>
+    </ul>
+    
+    <p>For more detailed information, refer to the <a href="/docs">full documentation</a>.</p>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "name": "Sample AI Agent",
+  "description": "A simple example workflow that can be used as a template",
+  "nodes": [
+    {
+      "id": "input_node",
+      "type": "InputNode",
+      "config": {
+        "input_fields": ["query", "user_id", "chat_id"]
+      }
+    },
+    {
+      "id": "llm_node",
+      "type": "LLMNode",
+      "config": {
+        "model": "gpt-4",
+        "system_prompt": "You are a helpful assistant that provides clear and concise answers.",
+        "tools": [],
+        "max_tokens": 1000,
+        "temperature": 0.7,
+        "memory_enabled": true,
+        "memory_window_size": 10
+      }
+    },
+    {
+      "id": "output_node",
+      "type": "OutputNode",
+      "config": {
+        "output_fields": ["response"]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "query",
+        "targetInput": "prompt"
+      }
+    },
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "user_id",
+        "targetInput": "user_id"
+      }
+    },
+    {
+      "source": "input_node",
+      "target": "llm_node",
+      "data": {
+        "sourceOutput": "chat_id",
+        "targetInput": "chat_id"
+      }
+    },
+    {
+      "source": "llm_node",
+      "target": "output_node",
+      "data": {
+        "sourceOutput": "response",
+        "targetInput": "response"
+      }
+    }
+  ],
+  "config": {
+    "max_retries": 3,
+    "timeout": 60,
+    "description": "This is a simple example workflow that can be used as a template for creating new AI agents.",
+    "version": 1,
+    "tags": ["example", "template"]
+  }
+}
