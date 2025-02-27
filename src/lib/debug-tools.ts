@@ -7,7 +7,7 @@ import { validateWorkflowJson, ValidationResult } from './workflow-schema';
  * Debug result interface
  */
 export interface DebugResult {
-  parsed: any;
+  parsed: unknown; // Replace with the actual type if known
   validationResult: ValidationResult;
 }
 

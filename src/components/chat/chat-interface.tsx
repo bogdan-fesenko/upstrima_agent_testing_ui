@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import {
   executeAgent,
-  getExecution,
   ChatMessage,
   Agent,
   getLatestOrCreateChat,
@@ -19,7 +18,7 @@ import {
   getFileDownloadUrl,
   updateFileMetadata
 } from '@/lib/api';
-import { Send, Paperclip, Globe, ChevronDown, ThumbsUp, ThumbsDown, Copy, RotateCcw, History, X, Download, Edit, Trash2, Plus } from 'lucide-react';
+import { Send, Paperclip, ChevronDown, ThumbsUp, ThumbsDown, Copy, RotateCcw, History, X, Download, Edit, Trash2, Plus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -55,8 +54,9 @@ export function ChatInterface({ agent, chatId: initialChatId }: ChatInterfacePro
   
   // Listen for chat creation events from the agent preview sidebar
   useEffect(() => {
-    const handleChatCreated = (event: any) => {
-      const { chatId, agentId } = event.detail;
+    const handleChatCreated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ chatId: string; agentId: string }>;
+      const { chatId, agentId } = customEvent.detail;
       
       if (agentId === agent?.id && chatId) {
         console.log(`New chat created from agent preview: ${chatId}`);
@@ -175,7 +175,7 @@ export function ChatInterface({ agent, chatId: initialChatId }: ChatInterfacePro
     
       initializeChat();
     }
-  }, [agent?.id]); // Only depend on agent ID changes, not the entire agent object
+  }, [agent]); // Include the entire agent object in the dependency array
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -680,7 +680,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  table: ({node, ...props}) => (
+                  table: (props) => (
                     <div className="table-wrapper">
                       <table {...props} />
                     </div>

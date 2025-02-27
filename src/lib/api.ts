@@ -3,11 +3,17 @@
  */
 
 // Base URL for API requests
-const API_BASE_URL = 'http://localhost:8000';
+// When deploying to Vercel, set NEXT_PUBLIC_API_URL in the Vercel project settings
+// pointing to your deployed backend URL (e.g., https://your-backend-api.com)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const API_PATH = '/api/v1';
 
-// Token refresh constants
-const TOKEN_REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes before expiry
+// For debugging
+if (process.env.NODE_ENV === 'development') {
+  console.log(`Using API base URL: ${API_BASE_URL}`);
+}
+
+// Token constants
 const AUTH_TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const TOKEN_EXPIRY_KEY = 'token_expiry';
@@ -24,7 +30,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
           ? errorData.detail
           : JSON.stringify(errorData.detail);
       }
-    } catch (e) {
+    } catch {
       // If we can't parse the error as JSON, just use the status text
     }
     
@@ -76,8 +82,8 @@ export interface Execution {
   agent_id: string;
   user_id: string;
   chat_id: string;
-  input?: any;
-  output?: any;
+  input?: unknown;
+  output?: unknown;
   status: string;
   error?: string;
   start_time: string; // ISO date-time
@@ -89,8 +95,8 @@ export interface NodeExecution {
   execution_id: string;
   node_id: string;
   node_type: string;
-  input_data?: any;
-  output_data?: any;
+  input_data?: unknown;
+  output_data?: unknown;
   status: string;
   error?: string;
   stack_trace?: string;
@@ -133,7 +139,7 @@ export interface ChatMessageMetadata {
   files?: string[];
   isWelcomeMessage?: boolean;
   error?: boolean;
-  [key: string]: any; // Allow other metadata properties
+  [key: string]: unknown; // Allow other metadata properties
 }
 
 export interface ChatMessageRequest {
@@ -144,7 +150,7 @@ export interface ChatMessageRequest {
 
 export interface ExecuteRequest {
   chat_id: string;
-  input: any;
+  input: unknown; // Replace with the actual type if known
 }
 
 // API functions
@@ -184,7 +190,7 @@ export async function getAgent(agentId: string): Promise<Agent> {
 export async function executeAgent(
   agentId: string,
   chatId: string,
-  input: any
+  input: unknown // Replace with the actual type if known
 ): Promise<{ response: string; error?: string }> {
   const token = await getAuthToken();
   const response = await fetch(`${API_BASE_URL}${API_PATH}/agents/${agentId}/execute`, {
@@ -361,7 +367,7 @@ export async function getChatFiles(chatId: string): Promise<FileInfo[]> {
   return handleResponse<FileInfo[]>(response);
 }
 
-export async function processFile(fileUrl: string): Promise<any> {
+export async function processFile(fileUrl: string): Promise<unknown> { // Replace with the actual type if known
   const token = await getAuthToken();
   const response = await fetch(`${API_BASE_URL}${API_PATH}/files/process`, {
     method: 'POST',
@@ -372,7 +378,7 @@ export async function processFile(fileUrl: string): Promise<any> {
     body: JSON.stringify({ file_url: fileUrl })
   });
   
-  return handleResponse<any>(response);
+  return handleResponse<unknown>(response); // Replace with the actual type if known
 }
 
 export async function deleteFile(fileId: string): Promise<void> {

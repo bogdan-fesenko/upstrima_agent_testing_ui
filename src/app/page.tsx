@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/main-layout';
 import { ChatInterface } from '@/components/chat/chat-interface';
@@ -25,7 +25,8 @@ export default function Home() {
   };
 
   // Function to fetch agents without automatically setting selected agent
-  const fetchAgents = async () => {
+  // Wrapped in useCallback to prevent unnecessary re-renders
+  const fetchAgents = useCallback(async () => {
     try {
       setLoading(true);
       const agentsData = await listAgents();
@@ -64,12 +65,12 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedAgent]);
 
   // Fetch agents on component mount only
   useEffect(() => {
     fetchAgents();
-  }, []);
+  }, [fetchAgents]);
   
   // Handle agent selection more efficiently
   useEffect(() => {
@@ -87,7 +88,8 @@ export default function Home() {
           
           // Expose the selected agent to the main layout component
           if (typeof window !== 'undefined') {
-            (window as any).__selectedAgent = agent;
+            // Use a type assertion to add the property to window
+            (window as Window & { __selectedAgent?: Agent }).__selectedAgent = agent;
           }
           
           // Dispatch an event to notify the agent preview sidebar
@@ -100,8 +102,10 @@ export default function Home() {
     };
     
     // Listen for custom agent selection event from sidebar
-    const handleAgentSelected = (event: any) => {
-      const { agentId } = event.detail;
+    const handleAgentSelected = (event: Event) => {
+      // Cast to CustomEvent to access detail property
+      const customEvent = event as CustomEvent;
+      const { agentId } = customEvent.detail;
       
       if (agents.length > 0) {
         const agent = agents.find((a: Agent) => a.id === agentId);
@@ -111,7 +115,8 @@ export default function Home() {
           
           // Expose the selected agent to the main layout component
           if (typeof window !== 'undefined') {
-            (window as any).__selectedAgent = agent;
+            // Use a type assertion to add the property to window
+            (window as Window & { __selectedAgent?: Agent }).__selectedAgent = agent;
           }
         }
       }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Agent, getAgent, createChat, addChatMessage, getChatMessages } from '@/lib/api';
+import { Agent, getAgent, createChat, addChatMessage } from '@/lib/api';
 import { X, Star, User } from 'lucide-react';
 
 interface AgentPreviewSidebarProps {
@@ -11,15 +11,15 @@ interface AgentPreviewSidebarProps {
 }
 
 export function AgentPreviewSidebar({ agent: propAgent, onClose }: AgentPreviewSidebarProps) {
-  const [expanded, setExpanded] = useState(false);
   const [agent, setAgent] = useState<Agent | null>(propAgent);
   const [loading, setLoading] = useState(false);
   // Removed showOutputInstructions state as instructions will always be visible
 
   // Listen for agent selection events
   useEffect(() => {
-    const handleAgentSelected = async (event: any) => {
-      const { agentId, agent: eventAgent } = event.detail;
+    const handleAgentSelected = async (event: Event) => {
+      const customEvent = event as CustomEvent<{ agentId: string; agent: Agent }>;
+      const { agentId, agent: eventAgent } = customEvent.detail;
       
       if (eventAgent) {
         // If the event already contains the agent data, use it
@@ -62,11 +62,6 @@ export function AgentPreviewSidebar({ agent: propAgent, onClose }: AgentPreviewS
 
   if (!agent) return null;
 
-  // Format date to DD/MM/YY
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear().toString().slice(2)}`;
-  };
 
   // Get creator from agent data or use placeholder
   const creator = agent.creator || "John Doe";

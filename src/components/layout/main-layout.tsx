@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './sidebar';
-import { Header } from './header';
 import { AgentPreviewSidebar } from './agent-preview-sidebar';
 import { Agent } from '@/lib/api';
 
@@ -12,15 +11,18 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [showAgentPreview, setShowAgentPreview] = useState(false);
 
   // Listen for agent selection events
   useEffect(() => {
-    const handleAgentSelected = (event: any) => {
-      const { agentId, agent: eventAgent } = event.detail;
-      
-      // Show the preview sidebar
-      setShowAgentPreview(true);
+    // Define a type for the custom event
+    interface AgentSelectedEventDetail {
+      agent?: Agent;
+    }
+    
+    const handleAgentSelected = (event: Event) => {
+      // Cast to CustomEvent to access detail property
+      const customEvent = event as CustomEvent<AgentSelectedEventDetail>;
+      const { agent: eventAgent } = customEvent.detail;
       
       // If the event contains the agent data, update our state
       if (eventAgent) {
@@ -40,8 +42,14 @@ export function MainLayout({ children }: MainLayoutProps) {
     // This is a workaround to get the selected agent from the page component
     // In a real app, you would use a global state management solution
     const checkForSelectedAgent = () => {
-      if (window && (window as any).__selectedAgent) {
-        setSelectedAgent((window as any).__selectedAgent);
+      // Define a type for the window with our custom property
+      type CustomWindow = Window & typeof globalThis & {
+        __selectedAgent?: Agent;
+      };
+      
+      const customWindow = window as CustomWindow;
+      if (customWindow && customWindow.__selectedAgent) {
+        setSelectedAgent(customWindow.__selectedAgent);
       }
     };
 
